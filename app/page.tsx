@@ -3,39 +3,40 @@ import React, { useState, useEffect, useRef } from 'react';
 // We are not importing images, as they are in the 'public' folder.
 
 // --- Icons (Inlined to avoid dependencies) ---
-// FIXED: Adjusted declaration for all function components to avoid implicit 'any' type errors during Vercel's TypeScript build.
-const Icon = ({ size = 24, className = "", children }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {children}
+// FIXED: Changed function signature to a single 'props' object to completely bypass implicit 'any' Type errors.
+const Icon = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={props.className}>
+    {props.children}
   </svg>
 );
 
-const Terminal = ({ size, className }) => <Icon size={size} className={className}><polyline points="4 17 10 11 4 5" /><line x1="12" x2="20" y1="19" y2="19" /></Icon>;
-const Briefcase = ({ size, className }) => <Icon size={size} className={className}><rect width="20" height="14" x="2" y="7" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></Icon>;
-const User = ({ size, className }) => <Icon size={size} className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></Icon>;
-const Cpu = ({ size, className }) => <Icon size={size} className={className}><rect x="4" y="4" width="16" height="16" rx="2" /><rect x="9" y="9" width="6" height="6" /><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/><path d="M20 9h3"/><path d="M20 14h3"/><path d="M1 9h3"/><path d="M1 14h3"/></Icon>;
-const FolderGit2 = ({ size, className }) => <Icon size={size} className={className}><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><circle cx="12" cy="13" r="2"/><path d="M14 11l3 3-3 3"/></Icon>;
-const Globe = ({ size, className }) => <Icon size={size} className={className}><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></Icon>;
-const Code2 = ({ size, className }) => <Icon size={size} className={className}><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></Icon>;
-const ExternalLink = ({ size, className }) => <Icon size={size} className={className}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></Icon>;
-const Mail = ({ size, className }) => <Icon size={size} className={className}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></Icon>;
-const Github = ({ size, className }) => <Icon size={size} className={className}><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></Icon>;
-const Linkedin = ({ size, className }) => <Icon size={size} className={className}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></Icon>;
-const Instagram = ({ size, className }) => <Icon size={size} className={className}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></Icon>;
-const Menu = ({ size, className }) => <Icon size={size} className={className}><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></Icon>;
-const X = ({ size, className }) => <Icon size={size} className={className}><line x1="18" x2="6" y1="6" y2="18" /><line x1="6" x2="18" y1="6" y2="18" /></Icon>;
-const Sun = ({ size, className }) => <Icon size={size} className={className}><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></Icon>;
-const Moon = ({ size, className }) => <Icon size={size} className={className}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></Icon>;
-const FileText = ({ size, className }) => <Icon size={size} className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></Icon>;
-const Download = ({ size, className }) => <Icon size={size} className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></Icon>;
-const BookOpen = ({ size, className }) => <Icon size={size} className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
-const ArrowLeft = ({ size, className }) => <Icon size={size} className={className}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></Icon>;
+const Terminal = (props) => <Icon {...props}><polyline points="4 17 10 11 4 5" /><line x1="12" x2="20" y1="19" y2="19" /></Icon>;
+const Briefcase = (props) => <Icon {...props}><rect width="20" height="14" x="2" y="7" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></Icon>;
+const User = (props) => <Icon {...props}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></Icon>;
+const Cpu = (props) => <Icon {...props}><rect x="4" y="4" width="16" height="16" rx="2" /><rect x="9" y="9" width="6" height="6" /><path d="M9 1v3"/><path d="M15 1v3"/><path d="M9 20v3"/><path d="M15 20v3"/><path d="M20 9h3"/><path d="M20 14h3"/><path d="M1 9h3"/><path d="M1 14h3"/></Icon>;
+const FolderGit2 = (props) => <Icon {...props}><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><circle cx="12" cy="13" r="2"/><path d="M14 11l3 3-3 3"/></Icon>;
+const Globe = (props) => <Icon {...props}><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></Icon>;
+const Code2 = (props) => <Icon {...props}><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></Icon>;
+const ExternalLink = (props) => <Icon {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></Icon>;
+const Mail = (props) => <Icon {...props}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></Icon>;
+const Github = (props) => <Icon {...props}><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></Icon>;
+const Linkedin = (props) => <Icon {...props}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></Icon>;
+const Instagram = (props) => <Icon {...props}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></Icon>;
+const Menu = (props) => <Icon {...props}><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></Icon>;
+const X = (props) => <Icon {...props}><line x1="18" x2="6" y1="6" y2="18" /><line x1="6" x2="18" y1="6" y2="18" /></Icon>;
+const Sun = (props) => <Icon {...props}><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></Icon>;
+const Moon = (props) => <Icon {...props}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></Icon>;
+const FileText = (props) => <Icon {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></Icon>;
+const Download = (props) => <Icon {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></Icon>;
+const BookOpen = (props) => <Icon {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
+const ArrowLeft = (props) => <Icon {...props}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></Icon>;
 
 
 // --- Trendy Components ---
 
 // Spotlight + 3D Tilt Card Component
-const SpotlightCard = ({ children, className = "", onClick = null, theme }) => {
+const SpotlightCard = (props) => {
+  const { children, className = "", onClick = null, theme } = props;
   const divRef = useRef(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
@@ -80,7 +81,6 @@ const SpotlightCard = ({ children, className = "", onClick = null, theme }) => {
   };
 
   return onClick ? (
-    // FIX: Removed React.createElement, simplified button return to standard JSX which is generally safer outside of strict TS files
     <button {...commonProps} onClick={onClick}>
       <div
         className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
@@ -106,18 +106,19 @@ const SpotlightCard = ({ children, className = "", onClick = null, theme }) => {
 };
 
 // Section Heading
-const SectionHeading = ({ icon: IconCmp, title, subtitle, theme }) => (
+const SectionHeading = (props) => (
   <div className="mb-12 flex flex-col items-start">
-    <div className={`flex items-center gap-2 ${theme === 'light' ? 'text-emerald-500' : 'text-emerald-400'} mb-3`}>
-      <IconCmp size={20} />
-      <span className="uppercase tracking-wider text-sm font-bold">{title}</span>
+    <div className={`flex items-center gap-2 ${props.theme === 'light' ? 'text-emerald-500' : 'text-emerald-400'} mb-3`}>
+      <props.icon size={20} />
+      <span className="uppercase tracking-wider text-sm font-bold">{props.title}</span>
     </div>
-    <h2 className={`text-3xl md:text-4xl font-bold ${theme === 'light' ? 'text-zinc-900' : 'text-zinc-100'}`}>{subtitle}</h2>
+    <h2 className={`text-3xl md:text-4xl font-bold ${props.theme === 'light' ? 'text-zinc-900' : 'text-zinc-100'}`}>{props.subtitle}</h2>
   </div>
 );
 
 // Nav Item
-const NavItem = ({ href, children, active, onClick = () => {}, theme }) => {
+const NavItem = (props) => {
+  const { href, children, active, onClick = () => {}, theme } = props;
   const handleClick = (e) => {
     if (href.startsWith('#')) {
       e.preventDefault();
@@ -148,7 +149,8 @@ const NavItem = ({ href, children, active, onClick = () => {}, theme }) => {
 };
 
 // Button Nav Item (for non-scrolling links like 'Blog')
-const ButtonNavItem = ({ children, active, onClick = () => {}, theme }) => {
+const ButtonNavItem = (props) => {
+  const { children, active, onClick = () => {}, theme } = props;
   const activeClasses = theme === 'light' ? 'text-emerald-500' : 'text-emerald-400';
   const inactiveClasses = theme === 'light' ? 'text-zinc-600 hover:text-zinc-900' : 'text-zinc-400 hover:text-zinc-100';
   
@@ -512,11 +514,11 @@ export default function App() {
                     <a href="#contact" onClick={() => handleNavClick('portfolio', 'contact')} className={`px-6 py-3 rounded-full font-bold transition-transform duration-200 hover:scale-105 border backdrop-blur-md flex items-center gap-2 ${theme === 'light' ? 'bg-white/50 text-zinc-900 hover:bg-white/70 border-black/10' : 'bg-zinc-900/50 text-white hover:bg-zinc-900 border-white/10'}`}>
                       Contact Me
                     </a>
-                    {/* FIXED CV PATH: /MAZIN_ABDULLAH.pdf */}
+                    {/* CV PATH: /MAZIN_ABDULLAH.pdf */}
                     <a href="/MAZIN_ABDULLAH.pdf" target="_blank" rel="noopener noreferrer" className={`px-6 py-3 rounded-full font-bold transition-transform duration-200 hover:scale-105 border backdrop-blur-md flex items-center gap-2 ${theme === 'light' ? 'bg-white/50 text-zinc-900 hover:bg-white/70 border-black/10' : 'bg-zinc-900/50 text-white hover:bg-zinc-900 border-white/10'}`}>
                       <FileText size={18} /> View CV
                     </a>
-                    {/* FIXED CV PATH: /MAZIN_ABDULLAH.pdf */}
+                    {/* CV PATH: /MAZIN_ABDULLAH.pdf */}
                     <a href="/MAZIN_ABDULLAH.pdf" download className={`px-6 py-3 rounded-full font-bold transition-transform duration-200 hover:scale-105 border backdrop-blur-md flex items-center gap-2 ${theme === 'light' ? 'bg-white/50 text-zinc-900 hover:bg-white/70 border-black/10' : 'bg-zinc-900/50 text-white hover:bg-zinc-900 border-white/10'}`}>
                       <Download size={18} /> Download CV
                     </a>
@@ -534,7 +536,7 @@ export default function App() {
                   
                   {/* Photo Column */}
                   <div className="lg:col-span-3 w-full h-full">
-                    {/* FIXED IMAGE PATH: /IMG_6902.jpg */}
+                    {/* IMAGE PATH: /IMG_6902.jpg */}
                     <div className={`relative rounded-2xl border p-1 group ${theme === 'light' ? 'border-black/10 bg-white/70' : 'border-white/10 bg-zinc-900/80'} backdrop-blur-md shadow-lg overflow-hidden`}>
                       <img 
                         src="/IMG_6902.jpg" // <-- Final correct path
