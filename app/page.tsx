@@ -2,8 +2,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 // We are not importing images, as they are in the 'public' folder.
 
+// Define a reusable type for basic props including children
+/** @typedef {object} IconProps @property {number} [size] @property {string} [className] @property {React.ReactNode} children */
+
 // --- Icons (Inlined to avoid dependencies) ---
-// FINAL FIX: Using a generic component signature that satisfies strict ESBuild/TypeScript checks by explicitly avoiding implicit 'any' on props.
+// FINAL FIX: Using React.FC (functional component) signature to correctly type 'children' and satisfy the strict TypeScript build environment.
+/** @type {React.FC<IconProps>} */
 const Icon = ({ size = 24, className = "", children }) => {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -12,6 +16,7 @@ const Icon = ({ size = 24, className = "", children }) => {
     );
 };
 
+// We use React.FC<React.PropsWithChildren<{}>> for components that only need children or minimal custom props
 const Terminal = (props) => <Icon {...props}><polyline points="4 17 10 11 4 5" /><line x1="12" x2="20" y1="19" y2="19" /></Icon>;
 const Briefcase = (props) => <Icon {...props}><rect width="20" height="14" x="2" y="7" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></Icon>;
 const User = (props) => <Icon {...props}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></Icon>;
