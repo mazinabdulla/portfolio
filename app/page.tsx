@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 // We are not importing images, as they are in the 'public' folder.
 
 // --- Icons (Inlined to avoid dependencies) ---
-// FIXED: Adjusted declaration to satisfy TypeScript/Vercel build requirements
+// FIXED: Adjusted declaration for all function components to avoid implicit 'any' type errors during Vercel's TypeScript build.
 const Icon = ({ size = 24, className = "", children }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     {children}
@@ -80,7 +80,7 @@ const SpotlightCard = ({ children, className = "", onClick = null, theme }) => {
   };
 
   return onClick ? (
-    // FIX: Simplified the return for the button using a fragment/div wrapper to avoid React.createElement complexity in this context
+    // FIX: Removed React.createElement, simplified button return to standard JSX which is generally safer outside of strict TS files
     <button {...commonProps} onClick={onClick}>
       <div
         className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
