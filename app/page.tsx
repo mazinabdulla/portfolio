@@ -2,13 +2,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 // We are not importing images, as they are in the 'public' folder.
 
-// Define a reusable type for basic props including children
-/** @typedef {object} IconProps @property {number} [size] @property {string} [className] @property {React.ReactNode} children */
-
 // --- Icons (Inlined to avoid dependencies) ---
 // FINAL FIX: Using React.FC (functional component) signature to correctly type 'children' and satisfy the strict TypeScript build environment.
-/** @type {React.FC<IconProps>} */
-const Icon = ({ size = 24, className = "", children }) => {
+const Icon = (props) => {
+    const { size = 24, className = "", children } = props;
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
             {children}
