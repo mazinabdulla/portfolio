@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 // We are not importing images, as they are in the 'public' folder.
 
-// --- Icons (Inlined to avoid dependencies) ---
-// FINAL FIX: Using React.FC (functional component) signature to correctly type 'children' and satisfy the strict TypeScript build environment.
+// Define a reusable type for basic props including children
 const Icon = (props) => {
     const { size = 24, className = "", children } = props;
     return (
@@ -46,8 +45,11 @@ const SpotlightCard = (props) => {
   const [opacity, setOpacity] = useState(0);
   const [transform, setTransform] = useState("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
 
+  // Disable hover/tilt effects on small screens (mobile)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768; 
+
   const handleMouseMove = (e) => {
-    if (!divRef.current) return;
+    if (isMobile || !divRef.current) return;
     const div = divRef.current;
     const rect = div.getBoundingClientRect();
     
@@ -63,15 +65,17 @@ const SpotlightCard = (props) => {
 
   const handleFocus = () => setOpacity(1);
   const handleBlur = () => setOpacity(0);
-  const handleMouseEnter = () => setOpacity(1);
+  const handleMouseEnter = () => { if (!isMobile) setOpacity(1); };
   const handleMouseLeave = () => {
-    setOpacity(0);
-    setTransform("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
+    if (!isMobile) {
+      setOpacity(0);
+      setTransform("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
+    }
   };
 
   const baseClasses = "relative overflow-hidden rounded-2xl backdrop-blur-md p-8 md:p-10 transition-all duration-300 ease-out hover:shadow-2xl hover:shadow-emerald-500/10";
-  const lightModeClasses = "border border-black/10 bg-white hover:border-black/20 hover:bg-white/70";
-  const darkModeClasses = "border border-white/10 bg-zinc-900/80 hover:border-white/20 hover:bg-zinc-800/80";
+  const lightModeClasses = "border border-black/10 bg-white hover:border-black/20 hover:bg-white/70 active:border-black/20 active:bg-white/70";
+  const darkModeClasses = "border border-white/10 bg-zinc-900/80 hover:border-white/20 hover:bg-zinc-800/80 active:border-white/20 active:bg-zinc-800/80";
 
   const commonProps = {
     ref: divRef,
@@ -80,7 +84,7 @@ const SpotlightCard = (props) => {
     onBlur: handleBlur,
     onMouseEnter: handleMouseEnter,
     onMouseLeave: handleMouseLeave,
-    style: { transform: transform },
+    style: { transform: isMobile ? 'none' : transform },
     className: `${baseClasses} ${theme === 'light' ? lightModeClasses : darkModeClasses} ${className}`
   };
 
@@ -89,7 +93,7 @@ const SpotlightCard = (props) => {
       <div
         className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
         style={{
-          opacity,
+          opacity: isMobile ? 0 : opacity, // Disable spotlight on mobile
           background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(0, 231, 149, 0.1), transparent 40%)`,
         }}
       />
@@ -100,7 +104,7 @@ const SpotlightCard = (props) => {
       <div
         className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
         style={{
-          opacity,
+          opacity: isMobile ? 0 : opacity, // Disable spotlight on mobile
           background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(0, 231, 149, 0.1), transparent 40%)`,
         }}
       />
@@ -540,12 +544,14 @@ export default function App() {
                   
                   {/* Photo Column */}
                   <div className="lg:col-span-3 w-full h-full">
-                    {/* IMAGE PATH: /IMG_6902.jpg */}
+                    {/* IMAGE PATH: /IMG_6902.jpg - Mobile: Grayscale/Zoom disabled, Focus effect applied */}
                     <div className={`relative rounded-2xl border p-1 group ${theme === 'light' ? 'border-black/10 bg-white/70' : 'border-white/10 bg-zinc-900/80'} backdrop-blur-md shadow-lg overflow-hidden`}>
                       <img 
-                        src="/IMG_6902.jpg" // <-- Final correct path
+                        src="/IMG_6902.jpg" // Final correct path
                         alt="Mazin Abdullah" 
-                        className="rounded-lg w-full h-auto object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-300 ease-in-out"
+                        // Desktop Hover: Grayscale -> Color, Zoom 5%
+                        // Mobile/Touch: No Grayscale/Zoom on touch, but container has touch feedback
+                        className="rounded-lg w-full h-auto object-cover md:grayscale md:group-hover:grayscale-0 md:group-hover:scale-105 transition-all duration-300 ease-in-out"
                       />
                     </div>
                   </div>
