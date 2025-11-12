@@ -231,6 +231,8 @@ export default function App() {
   const [theme, setTheme] = useState('dark');
   const [currentView, setCurrentView] = useState('portfolio'); // 'portfolio', 'blogList', 'blogPost'
   const [selectedPost, setSelectedPost] = useState(null); // Store the clicked blog post
+  const photoContainerRef = useRef(null);
+  const [photoYOffset, setPhotoYOffset] = useState(0); // State for Parallax offset
 
   // Effect for loading theme from localStorage
   useEffect(() => {
@@ -247,10 +249,28 @@ export default function App() {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
+  // Parallax Effect Calculation
   useEffect(() => {
-    const timer = setTimeout(() => setIsHeroLoaded(true), 100);
+    const handleParallaxScroll = () => {
+      if (photoContainerRef.current) {
+        const rect = photoContainerRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        
+        // Calculate how far the element is from the top of the viewport
+        // We want the effect to run as the element moves from the bottom to the top of the viewport.
+        const scrollProgress = 1 - (rect.top + rect.height / 2) / viewportHeight;
+
+        // Apply a small downward/upward shift as the user scrolls past the photo
+        // Offset: Max -30px (up) to +30px (down)
+        const offset = Math.max(-30, Math.min(30, (scrollProgress - 0.5) * 60));
+        
+        setPhotoYOffset(offset);
+      }
+    };
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+      handleParallaxScroll(); // Run parallax calculation on every scroll frame
       
       // Only run scroll spy if we are on the main portfolio page
       if (currentView === 'portfolio') {
@@ -267,12 +287,16 @@ export default function App() {
       }
     };
 
+    const timer = setTimeout(() => setIsHeroLoaded(true), 100);
     window.addEventListener('scroll', handleScroll);
+    handleParallaxScroll(); // Initial position setup
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
     };
   }, [currentView]); // Rerun this effect if the view changes
+
 
   const projects = [
     {
@@ -543,7 +567,10 @@ export default function App() {
                 <div className="grid grid-cols-1 lg:grid-cols-10 gap-12 items-start">
                   
                   {/* Photo Column */}
-                  <div className="lg:col-span-3 w-full h-full">
+                  <div ref={photoContainerRef} 
+                       style={{ transform: `translateY(${photoYOffset}px)` }} // Apply Parallax offset
+                       className="lg:col-span-3 w-full h-full transition-transform duration-75 will-change-transform" // transition for smooth parallax
+                  >
                     {/* IMAGE PATH: /IMG_6902.jpg - Mobile: Grayscale/Zoom disabled, Focus effect applied */}
                     <div className={`relative rounded-2xl border p-1 group ${theme === 'light' ? 'border-black/10 bg-white/70' : 'border-white/10 bg-zinc-900/80'} backdrop-blur-md shadow-lg overflow-hidden`}>
                       <img 
