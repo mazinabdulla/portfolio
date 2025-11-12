@@ -211,6 +211,64 @@ const AnimatedSection = ({ children, className = "", id = "" }) => {
   );
 };
 
+// The ProjectCard wrapper component, modified for 3D mobile reveal
+const ProjectCardWrapper = (props) => {
+    const { children, index, className } = props;
+    const ref = useRef(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    // Only apply the complex effect on small screens to enhance mobile experience
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+    useEffect(() => {
+        if (!isMobile) {
+            setIsVisible(true); // Always visible on desktop for SpotlightCard to take over
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    // Staggered reveal based on index
+                    setTimeout(() => {
+                        setIsVisible(true);
+                        observer.unobserve(entry.target);
+                    }, index * 150); // 150ms delay per card
+                }
+            },
+            { root: null, threshold: 0.1 }
+        );
+
+        if (ref.current) observer.observe(ref.current);
+
+        return () => {
+            if (ref.current) observer.unobserve(ref.current);
+        };
+    }, [index, isMobile]);
+
+    // Apply the 3D mobile reveal transform
+    const mobileTransform = isVisible 
+        ? 'opacity-100 rotateX(0deg) scale(1)'
+        : 'opacity-0 rotateX(90deg) scale(0.8)';
+    
+    // Desktop uses the regular AnimatedSection wrapper (handled by the parent)
+    const desktopTransform = 'opacity-100 rotateX(0deg) scale(1)';
+
+    return (
+        <div
+            ref={ref}
+            className={`transition-all duration-500 ease-out will-change-transform ${className}`}
+            style={{ 
+                transform: isMobile ? mobileTransform : desktopTransform,
+                perspective: isMobile ? '1000px' : 'none' // Enable 3D space only on mobile
+            }}
+        >
+            {children}
+        </div>
+    );
+};
+
+
 // Theme Toggle Button
 const ThemeToggle = ({ theme, toggleTheme }) => (
   <button
@@ -474,10 +532,8 @@ export default function App() {
             <NavItem href="#projects" active={activeSection === 'projects' && currentView === 'portfolio'} onClick={() => handleNavClick('portfolio', 'projects')} theme={theme}>Projects</NavItem>
             <NavItem href="#contact" active={activeSection === 'contact' && currentView === 'portfolio'} onClick={() => handleNavClick('portfolio', 'contact')} theme={theme}>Contact</NavItem>
             <ButtonNavItem active={currentView !== 'portfolio'} onClick={() => handleNavClick('blogList')} theme={theme}>Blog</ButtonNavItem>
-            <div className={`w-px h-5 ${theme === 'light' ? 'bg-zinc-200' : 'bg-zinc-700'}`}></div>
-            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
           </div>
-           {/* Mobile Menu Button */}
+           {/* Mobile Menu Button (Toggle is now in Hero Section) */}
            <button 
              className={`md:hidden transition ${theme === 'light' ? 'text-zinc-500 hover:text-zinc-900' : 'text-zinc-400 hover:text-white'}`}
              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -524,6 +580,13 @@ export default function App() {
             <section id="home" className="pt-40 pb-20 md:pt-60 md:pb-40 px-6 relative overflow-hidden">
               <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] ${theme === 'light' ? 'bg-emerald-500/10' : 'bg-emerald-500/10'} blur-[120px] rounded-full pointer-events-none -z-10`}></div>
               
+              {/* Theme Toggle Button (Moved from Nav to Hero) */}
+              <div className="absolute top-20 right-6 md:top-32 md:right-12 z-20">
+                <div className={`p-1.5 rounded-full backdrop-blur-md border ${theme === 'light' ? 'border-black/10 bg-white/70' : 'border-white/10 bg-zinc-900/80'} shadow-md`}>
+                    <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+                </div>
+              </div>
+
               <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col items-start max-w-3xl">
                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${theme === 'light' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'} text-sm font-medium mb-6 backdrop-blur-md transition-all duration-700 ease-out ${isHeroLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
@@ -607,7 +670,7 @@ export default function App() {
                               <h4 className="text-sm uppercase tracking-wider text-zinc-500 font-semibold mb-3">{skillGroup.category}</h4>
                               <div className="flex flex-wrap gap-2">
                                 {skillGroup.items.map((skill) => (
-                                  <span key={skill} className={`px-3 py-1.5 text-sm rounded-md border transition cursor-default ${theme === 'light' ? 'bg-black/5 text-zinc-700 border-black/5 hover:border-emerald-500/30 hover:bg-black/1Go hover:text-zinc-900' : 'bg-white/5 text-zinc-300 border-white/5 hover:border-emerald-500/30 hover:bg-white/10 hover:text-white'}`}>
+                                  <span key={skill} className={`px-3 py-1.5 text-sm rounded-md border transition cursor-default ${theme === 'light' ? 'bg-black/5 text-zinc-700 border-black/5 hover:border-emerald-500/30 hover:bg-black/10 hover:text-zinc-900' : 'bg-white/5 text-zinc-300 border-white/5 hover:border-emerald-500/30 hover:bg-white/10 hover:text-white'}`}>
                                     {skill}
                                   </span>
                                 ))}
@@ -628,35 +691,40 @@ export default function App() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[minmax(300px,auto)]">
                   {projects.map((project, index) => (
-                     <SpotlightCard 
-                        key={index} 
-                        className={`flex flex-col justify-between group ${project.size === 'large' ? 'md:col-span-2 lg:col-span-2' : ''}`}
-                        theme={theme}
-                      >
-                        <div>
-                          <div className="flex justify-between items-start mb-6">
-                            <div className={`p-3 rounded-xl border mb-4 group-hover:scale-110 transition-transform duration-300 ${theme === 'light' ? 'bg-black/5 text-emerald-500 border-black/10' : 'bg-white/5 text-emerald-400 border-white/10'}`}>
-                              {project.size === 'large' ? <Globe size={24} /> : <Code2 size={24} />}
+                     <ProjectCardWrapper // Use wrapper for mobile animation
+                        key={index}
+                        index={index}
+                        className={`flex flex-col justify-between ${project.size === 'large' ? 'md:col-span-2 lg:col-span-2' : ''}`}
+                     >
+                        <SpotlightCard 
+                            className="h-full"
+                            theme={theme}
+                        >
+                            <div className="flex flex-col h-full">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className={`p-3 rounded-xl border mb-4 transition-transform duration-300 ${theme === 'light' ? 'bg-black/5 text-emerald-500 border-black/10' : 'bg-white/5 text-emerald-400 border-white/10'}`}>
+                                      {project.size === 'large' ? <Globe size={24} /> : <Code2 size={24} />}
+                                    </div>
+                                     <a href={project.link} className={`p-2 rounded-lg transition-all ${theme === 'light' ? 'text-zinc-500 hover:text-zinc-900 hover:bg-black/10 active:bg-black/10' : 'text-zinc-500 hover:text-white hover:bg-white/10 active:bg-white/10'}`}>
+                                      <ExternalLink size={20} />
+                                    </a>
+                                </div>
+                                
+                                <h3 className={`text-2xl font-bold ${theme === 'light' ? 'text-zinc-900' : 'text-white'} mb-4 hover:${theme === 'light' ? 'text-emerald-500' : 'text-emerald-400'} transition-colors`}>{project.title}</h3>
+                                <p className={`${theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'} leading-relaxed mb-8`}>
+                                    {project.description}
+                                </p>
                             </div>
-                             <a href={project.link} className={`p-2 rounded-lg transition-all ${theme === 'light' ? 'text-zinc-500 hover:text-zinc-900 hover:bg-black/10' : 'text-zinc-500 hover:text-white hover:bg-white/10'}`}>
-                              <ExternalLink size={20} />
-                            </a>
-                          </div>
-                          
-                          <h3 className={`text-2xl font-bold ${theme === 'light' ? 'text-zinc-900' : 'text-white'} mb-4 group-hover:${theme === 'light' ? 'text-emerald-500' : 'text-emerald-4R00'} transition-colors`}>{project.title}</h3>
-                          <p className={`${theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'} leading-relaxed mb-8`}>
-                            {project.description}
-                          </p>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2 mt-auto">
-                          {project.tags.map(tag => (
-                            <span key={tag} className={`text-xs font-mono rounded-md border ${theme === 'light' ? 'text-zinc-500 bg-black/5 border-black/5' : 'text-zinc-400 bg-white/5 border-white/5'} px-2 py-1`}>
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                     </SpotlightCard>
+                            
+                            <div className="flex flex-wrap gap-2 mt-auto">
+                              {project.tags.map(tag => (
+                                <span key={tag} className={`text-xs font-mono rounded-md border ${theme === 'light' ? 'text-zinc-500 bg-black/5 border-black/5' : 'text-zinc-400 bg-white/5 border-white/5'} px-2 py-1`}>
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                        </SpotlightCard>
+                     </ProjectCardWrapper>
                   ))}
                 </div>
               </div>
@@ -713,7 +781,7 @@ export default function App() {
                     theme={theme}
                   >
                     <div className="flex flex-col h-full">
-                      <h3 className={`text-2xl font-bold ${theme === 'light' ? 'text-zinc-900' : 'text-white'} mb-4 group-hover:${theme === 'light' ? 'text-emerald-500' : 'text-emerald-400'} transition-colors`}>{post.title}</h3>
+                      <h3 className={`text-2xl font-bold ${theme === 'light' ? 'text-zinc-900' : 'text-white'} mb-4 hover:${theme === 'light' ? 'text-emerald-500' : 'text-emerald-400'} transition-colors`}>{post.title}</h3>
                       <p className={`${theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'} leading-relaxed mb-6`}>
                         {post.summary}
                       </p>
