@@ -258,11 +258,8 @@ const ProjectCardWrapper = (props) => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
     useEffect(() => {
-        if (!isMobile) {
-            setIsVisible(true); // Always visible on desktop for SpotlightCard to take over
-            return;
-        }
-
+        // We want the complex stagger/reveal on both mobile and desktop (if not hovering) 
+        // to handle scroll events.
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
@@ -283,21 +280,20 @@ const ProjectCardWrapper = (props) => {
         };
     }, [index]);
 
-    // Apply the 3D mobile reveal transform
-    const mobileTransform = isVisible 
-        ? 'opacity-100 rotateX(0deg) scale(1)'
-        : 'opacity-0 rotateX(20deg) scale(0.9)'; // Subtle rotate for mobile entry
+    // Apply the 3D 'Overlay' transition transform
+    const transformStyle = isVisible 
+        ? 'opacity-100 rotateX(0deg) translateX(0%)' 
+        : 'opacity-0 rotateX(10deg) translateX(10%)'; 
     
-    // Desktop uses the regular AnimatedSection wrapper (handled by the parent)
-    const desktopTransform = 'opacity-100 rotateX(0deg) scale(1)';
-
+    // Adding perspective for 3D effect
     return (
         <div
             ref={ref}
-            className={`transition-all duration-500 ease-out will-change-transform ${className}`}
+            className={`transition-all duration-700 ease-out will-change-transform ${className}`}
             style={{ 
-                transform: isMobile ? mobileTransform : desktopTransform,
-                perspective: isMobile ? '1000px' : 'none' // Enable 3D space only on mobile
+                transform: transformStyle,
+                transformStyle: 'preserve-3d', // Enable 3D space
+                perspective: '1000px',
             }}
         >
             {children}
@@ -617,7 +613,7 @@ export default function App() {
               <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] ${theme === 'light' ? 'bg-emerald-500/10' : 'bg-emerald-500/10'} blur-[120px] rounded-full pointer-events-none -z-10`}></div>
               
               {/* Theme Toggle Button (FIXED POSITION) */}
-              <div className="fixed top-6 right-6 md:top-10 md:right-12 z-50">
+              <div className="fixed top-20 right-6 md:top-10 md:right-12 z-50">
                 <div className={`p-1.5 rounded-full backdrop-blur-md border ${theme === 'light' ? 'border-black/10 bg-white/70' : 'border-white/10 bg-zinc-900/80'} shadow-md`}>
                     <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
                 </div>
@@ -781,7 +777,7 @@ export default function App() {
               <div className="absolute bottom-0 right-1/2 translate-x-1/2 w-[600px] h-[400px] bg-emerald-500/5 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
               <div className="max-w-4xl mx-auto text-center">
-                 <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-8 border backdrop-blur-md ${theme === 'light' ? 'bg-black/5 text-emerald-500 border-black/10' : 'bg-white/5 text-emerald-400 border-white/10'}`}>
+                 <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-8 border backdrop-blur-md ${theme === 'light' ? 'bg-black/5 text-emerald-500 border-black/10' : 'bg-white/5 text-emerald-400 border-black/10'}`}>
                     <Mail size={16} /> Get in touch
                   </div>
                 <h2 className={`text-4xl md:text-6xl font-bold ${theme === 'light' ? 'text-zinc-900' : 'text-white'} mb-8 leading-tight`}>
