@@ -45,7 +45,7 @@ const SpotlightCard = (props) => {
   const [opacity, setOpacity] = useState(0);
   const [transform, setTransform] = useState("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)");
 
-  // Disable hover/tilt effects on small screens (mobile)
+  // Check for mobile (used to disable complex hover effects)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768; 
 
   const handleMouseMove = (e) => {
@@ -74,6 +74,7 @@ const SpotlightCard = (props) => {
   };
 
   const baseClasses = "relative overflow-hidden rounded-2xl backdrop-blur-md p-8 md:p-10 transition-all duration-300 ease-out hover:shadow-2xl hover:shadow-emerald-500/10";
+  // Added active styles for better touch feedback on mobile
   const lightModeClasses = "border border-black/10 bg-white hover:border-black/20 hover:bg-white/70 active:border-black/20 active:bg-white/70";
   const darkModeClasses = "border border-white/10 bg-zinc-900/80 hover:border-white/20 hover:bg-zinc-800/80 active:border-white/20 active:bg-zinc-800/80";
 
@@ -174,7 +175,7 @@ const ButtonNavItem = (props) => {
   );
 };
 
-// AnimatedSection Component
+// AnimatedSection Component - General scroll reveal
 const AnimatedSection = ({ children, className = "", id = "" }) => {
   const ref = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -211,6 +212,42 @@ const AnimatedSection = ({ children, className = "", id = "" }) => {
   );
 };
 
+// AnimatedTextBlock Component - For smooth text reveal
+const AnimatedText = ({ children, delay = 0 }) => {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          }, delay);
+        }
+      },
+      { root: null, rootMargin: '0px', threshold: 0.5 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => {
+      if (ref.current) observer.unobserve(ref.current);
+    };
+  }, [delay]);
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+      }`}
+    >
+      {children}
+    </div>
+  );
+};
+
+
 // The ProjectCard wrapper component, modified for 3D mobile reveal
 const ProjectCardWrapper = (props) => {
     const { children, index, className } = props;
@@ -244,12 +281,12 @@ const ProjectCardWrapper = (props) => {
         return () => {
             if (ref.current) observer.unobserve(ref.current);
         };
-    }, [index, isMobile]);
+    }, [index]);
 
     // Apply the 3D mobile reveal transform
     const mobileTransform = isVisible 
         ? 'opacity-100 rotateX(0deg) scale(1)'
-        : 'opacity-0 rotateX(90deg) scale(0.8)';
+        : 'opacity-0 rotateX(20deg) scale(0.9)'; // Subtle rotate for mobile entry
     
     // Desktop uses the regular AnimatedSection wrapper (handled by the parent)
     const desktopTransform = 'opacity-100 rotateX(0deg) scale(1)';
@@ -314,13 +351,11 @@ export default function App() {
         const rect = photoContainerRef.current.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
         
-        // Calculate how far the element is from the top of the viewport
-        // We want the effect to run as the element moves from the bottom to the top of the viewport.
+        // Calculate scroll position relative to the viewport center (0.5)
         const scrollProgress = 1 - (rect.top + rect.height / 2) / viewportHeight;
 
-        // Apply a small downward/upward shift as the user scrolls past the photo
-        // Offset: Max -30px (up) to +30px (down)
-        const offset = Math.max(-30, Math.min(30, (scrollProgress - 0.5) * 60));
+        // Apply a controlled shift for smoother parallax on mobile. Max 20px
+        const offset = Math.max(-20, Math.min(20, (scrollProgress - 0.5) * 40));
         
         setPhotoYOffset(offset);
       }
@@ -328,7 +363,8 @@ export default function App() {
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
-      handleParallaxScroll(); // Run parallax calculation on every scroll frame
+      // OPTIMIZED: Less aggressive parallax transition for performance
+      requestAnimationFrame(handleParallaxScroll); 
       
       // Only run scroll spy if we are on the main portfolio page
       if (currentView === 'portfolio') {
@@ -533,7 +569,7 @@ export default function App() {
             <NavItem href="#contact" active={activeSection === 'contact' && currentView === 'portfolio'} onClick={() => handleNavClick('portfolio', 'contact')} theme={theme}>Contact</NavItem>
             <ButtonNavItem active={currentView !== 'portfolio'} onClick={() => handleNavClick('blogList')} theme={theme}>Blog</ButtonNavItem>
           </div>
-           {/* Mobile Menu Button (Toggle is now in Hero Section) */}
+           {/* Mobile Menu Button (Toggle is in Hero Section) */}
            <button 
              className={`md:hidden transition ${theme === 'light' ? 'text-zinc-500 hover:text-zinc-900' : 'text-zinc-400 hover:text-white'}`}
              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -580,8 +616,8 @@ export default function App() {
             <section id="home" className="pt-40 pb-20 md:pt-60 md:pb-40 px-6 relative overflow-hidden">
               <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] ${theme === 'light' ? 'bg-emerald-500/10' : 'bg-emerald-500/10'} blur-[120px] rounded-full pointer-events-none -z-10`}></div>
               
-              {/* Theme Toggle Button (Moved from Nav to Hero) */}
-              <div className="absolute top-20 right-6 md:top-32 md:right-12 z-20">
+              {/* Theme Toggle Button (FIXED POSITION) */}
+              <div className="fixed top-6 right-6 md:top-10 md:right-12 z-50">
                 <div className={`p-1.5 rounded-full backdrop-blur-md border ${theme === 'light' ? 'border-black/10 bg-white/70' : 'border-white/10 bg-zinc-900/80'} shadow-md`}>
                     <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
                 </div>
@@ -648,17 +684,27 @@ export default function App() {
 
                   {/* Text & Skills Columns */}
                   <div className="lg:col-span-7 w-full h-full flex flex-col gap-12">
-                    <div className={`space-y-6 text-lg ${theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'} leading-relaxed`}>
-                      <p>
-                        I'm a passionate developer who bridges the gap between functional complexity and visual simplicity. My journey began with a curiosity for how things worked on the screen, which quickly evolved into a career crafting professional web applications.
-                      </p>
-                      <p>
-                        Currently, I specialize in the <strong className={`${theme === 'light' ? 'text-zinc-800' : 'text-zinc-200'}`}>React ecosystem</strong>, focusing on building scalable front-end architectures. I believe a good website isn't just code; it's an experience that should be intuitive and memorable.
-                      </p>
-                      <p>
-                        When I'm not coding, you can find me exploring new design trends, contributing to open-source, or optimizing my terminal setup.
-                      </p>
-                    </div>
+                    <AnimatedText delay={0}>
+                      <div className={`space-y-6 text-lg ${theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'} leading-relaxed`}>
+                        <p>
+                          I'm a passionate developer who bridges the gap between functional complexity and visual simplicity. My journey began with a curiosity for how things worked on the screen, which quickly evolved into a career crafting professional web applications.
+                        </p>
+                      </div>
+                    </AnimatedText>
+                    <AnimatedText delay={100}>
+                      <div className={`space-y-6 text-lg ${theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'} leading-relaxed`}>
+                        <p>
+                          Currently, I specialize in the <strong className={`${theme === 'light' ? 'text-zinc-800' : 'text-zinc-200'}`}>React ecosystem</strong>, focusing on building scalable front-end architectures. I believe a good website isn't just code; it's an experience that should be intuitive and memorable.
+                        </p>
+                      </div>
+                    </AnimatedText>
+                    <AnimatedText delay={200}>
+                      <div className={`space-y-6 text-lg ${theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'} leading-relaxed`}>
+                        <p>
+                          When I'm not coding, you can find me exploring new design trends, contributing to open-source, or optimizing my terminal setup.
+                        </p>
+                      </div>
+                    </AnimatedText>
 
                      <SpotlightCard className="h-full" theme={theme}>
                         <h3 className={`text-xl font-bold ${theme === 'light' ? 'text-zinc-900' : 'text-white'} mb-6 flex items-center gap-2`}>
